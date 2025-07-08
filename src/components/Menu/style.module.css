@@ -18,7 +18,7 @@
   filter: brightness(80%);
   transform: translateY(-2px);
   transition: all 0.1s ease-in-out;
-  color: var(--text-default);
+  color: var(--text-hover-color);
 }
 .menuLink svg {
   width: 2.4rem;
