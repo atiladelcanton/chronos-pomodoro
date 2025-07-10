@@ -7,10 +7,12 @@ import type { Task } from '../../models/Task';
 import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
 import { getNextCycle } from '../../utils/getNextCicle';
 import { getNextCicleType } from '../../utils/getNextCicleType';
-import { formatSecondsToMinute } from '../../utils/formatSecondsToMinute';
+import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
+import { Tips } from '../Tips';
+import { TimerWorkerManager } from '../../workers/timeWorkerManagers';
 
 export function FormTask() {
-  const { state, setState } = useTaskContext();
+  const { state, dispatch } = useTaskContext();
   const taskNameInput = useRef<HTMLInputElement>(null);
 
   const nextCycle = getNextCycle(state.currentCycle);
@@ -37,30 +39,11 @@ export function FormTask() {
       duration: state.config[nextCycleType],
       type: nextCycleType,
     };
-    const secondsRemaining = newTask.duration * 60;
-    setState(prev => ({
-      ...prev,
-      activeTask: newTask,
-      currentCycle: nextCycle,
-      secondsRemaining: secondsRemaining,
-      formmatedSecondsRemaining: formatSecondsToMinute(secondsRemaining),
-      tasks: [...prev.tasks, newTask],
-    }));
+
+    dispatch({ type: TaskActionTypes.START_TASK, payload: newTask });
   };
   const handleInterruptTask = () => {
-    setState(prev => ({
-      ...prev,
-      activeTask: null,
-      secondsRemaining: 0,
-      formmatedSecondsRemaining: '00:00',
-      tasks: prev.tasks.map(task => {
-        if (prev.activeTask && task.id !== prev.activeTask.id) return task;
-        return {
-          ...task,
-          interruptDate: Date.now(),
-        };
-      }),
-    }));
+    dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
   };
   return (
     <form className='form' onSubmit={handleCreateNewTask}>
@@ -75,7 +58,7 @@ export function FormTask() {
         />
       </div>
       <div className='formRow'>
-        <p>Lorem ipsum dolor sit amet.</p>
+        <Tips />
       </div>
       {state.currentCycle > 0 && (
         <div className='formRow'>
