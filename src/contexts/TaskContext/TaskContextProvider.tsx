@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { use, useEffect, useReducer, useRef } from 'react';
 
 import { initialTaskState } from './initialTaskState';
 import { TaskContext } from './TaskContext';
@@ -6,6 +6,7 @@ import { taskReducer } from './taskReducer';
 import { TimerWorkerManager } from '../../workers/timeWorkerManagers';
 import { TaskActionTypes } from './taskActions';
 import { formatSecondsToMinute } from '../../utils/formatSecondsToMinute';
+import { loadBeep } from '../../utils/loadBeep';
 
 type TaskContextProviderProps = {
   children: React.ReactNode;
@@ -13,12 +14,17 @@ type TaskContextProviderProps = {
 
 export function TaskContextProvider({ children }: TaskContextProviderProps) {
   const [state, dispatch] = useReducer(taskReducer, initialTaskState);
+  let playBeepRef = useRef<() => void | null>(null);
   const worker = TimerWorkerManager.getInstance();
   worker.onmessage(event => {
     const countDownSeconds = event.data;
-    console.log(countDownSeconds);
+
     if (countDownSeconds <= 0) {
-      console.log('Task completed');
+      if (playBeepRef.current) {
+        playBeepRef.current();
+        playBeepRef.current = null; // Reset after playing
+      }
+
       dispatch({
         type: TaskActionTypes.COMPLETE_TASK,
       });
@@ -33,11 +39,20 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
   useEffect(() => {
     if (!state.activeTask) {
       worker.terminate();
-      console.log('Worker terminated due to no active task');
     }
     worker.postMessage(state);
     document.title = formatSecondsToMinute(state.secondsRemaining);
   }, [worker, state]);
+
+  useEffect(() => {
+    if (state.activeTask && playBeepRef.current === null) {
+      playBeepRef.current = loadBeep();
+    } else {
+      console.log('Zerando audio');
+      playBeepRef.current = null;
+    }
+  }, [state.activeTask]);
+
   return (
     <TaskContext.Provider value={{ state, dispatch }}>
       {children}
