@@ -9,7 +9,8 @@ import { getNextCycle } from '../../utils/getNextCicle';
 import { getNextCicleType } from '../../utils/getNextCicleType';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { Tips } from '../Tips';
-import { TimerWorkerManager } from '../../workers/timeWorkerManagers';
+
+import { showMessage } from '../../adapters/showMessage';
 
 export function FormTask() {
   const { state, dispatch } = useTaskContext();
@@ -20,12 +21,13 @@ export function FormTask() {
 
   const handleCreateNewTask = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    showMessage.dissmiss();
     const input = taskNameInput.current;
     if (!input) return;
 
     const taskName = input.value.trim();
     if (!taskName) {
-      alert('Por favor, insira uma tarefa válida.');
+      showMessage.warning('Por favor, insira uma tarefa válida.');
       input.focus();
       return;
     }
@@ -41,8 +43,11 @@ export function FormTask() {
     };
 
     dispatch({ type: TaskActionTypes.START_TASK, payload: newTask });
+    showMessage.success(`Tarefa "${taskName}" iniciada!`);
   };
   const handleInterruptTask = () => {
+    showMessage.dissmiss();
+    showMessage.info('Tarefa interrompida.');
     dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
   };
   return (
