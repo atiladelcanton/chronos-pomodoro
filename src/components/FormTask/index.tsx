@@ -15,13 +15,13 @@ import { showMessage } from '../../adapters/showMessage';
 export function FormTask() {
   const { state, dispatch } = useTaskContext();
   const taskNameInput = useRef<HTMLInputElement>(null);
-
+  const lastTaskName = state.tasks[state.tasks.length - 1]?.name || '';
   const nextCycle = getNextCycle(state.currentCycle);
   const nextCycleType = getNextCicleType(nextCycle);
 
   const handleCreateNewTask = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    showMessage.dissmiss();
+    showMessage.dismiss();
     const input = taskNameInput.current;
     if (!input) return;
 
@@ -46,7 +46,7 @@ export function FormTask() {
     showMessage.success(`Tarefa "${taskName}" iniciada!`);
   };
   const handleInterruptTask = () => {
-    showMessage.dissmiss();
+    showMessage.dismiss();
     showMessage.info('Tarefa interrompida.');
     dispatch({ type: TaskActionTypes.INTERRUPT_TASK });
   };
@@ -60,6 +60,7 @@ export function FormTask() {
           labelText='Tarefa'
           ref={taskNameInput}
           disabled={!!state.activeTask}
+          defaultValue={lastTaskName}
         />
       </div>
       <div className='formRow'>
