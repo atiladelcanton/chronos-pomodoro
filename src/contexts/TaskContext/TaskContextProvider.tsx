@@ -1,4 +1,4 @@
-import React, { use, useEffect, useReducer, useRef } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 
 import { initialTaskState } from './initialTaskState';
 import { TaskContext } from './TaskContext';
@@ -50,10 +50,13 @@ export function TaskContextProvider({ children }: TaskContextProviderProps) {
 
   useEffect(() => {
     localStorage.setItem('state', JSON.stringify(state));
+
     if (!state.activeTask) {
       worker.terminate();
     }
+
     worker.postMessage(state);
+
     document.title = `${formatSecondsToMinute(
       state.secondsRemaining,
     )} - Chronos Pomodoro`;

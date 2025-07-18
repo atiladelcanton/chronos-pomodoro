@@ -7,12 +7,15 @@ import styles from './styles.module.css';
 import { useTaskContext } from '../../contexts/TaskContext/useTaskContext';
 import { formateDate } from '../../utils/formatDate';
 import { getTaskStatus } from '../../utils/getTaskStatus';
-import { sortTasks, SortTasksOptions } from '../../utils/sortTasks';
+import { sortTasks, type SortTasksOptions } from '../../utils/sortTasks';
 import { useEffect, useState } from 'react';
 import { TaskActionTypes } from '../../contexts/TaskContext/taskActions';
 import { showMessage } from '../../adapters/showMessage';
-import { toast } from 'react-toastify';
+
 export function History() {
+  useEffect(() => {
+    document.title = 'Histórico  - Chronos Pomodoro';
+  }, []);
   const { state, dispatch } = useTaskContext();
   const [confirmClearHistory, setConfirmClearHistory] = useState(false);
   const hasTasks = state.tasks.length > 0;
